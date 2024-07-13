@@ -1,17 +1,24 @@
 import { fetchMetadata } from "frames.js/next";
-import { Metadata } from "next";
-
-export async function generateMetadata(): Promise<Metadata> {
+ 
+export async function generateMetadata() {
   return {
-    title: "Frames Next.js Example",
+    title: "My Page",
+    // ...
     other: {
+      // ...
       ...(await fetchMetadata(
-        new URL("/frames", process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+        // provide a full URL to your /frames endpoint
+        new URL(
+          "/frames",
+          process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : "http://localhost:3000"
+        )
       )),
     },
   };
 }
-
-export default async function Home() {
-  return <div>GM user data example.</div>;
+ 
+export default function Page() {
+  return <span>My existing page</span>;
 }
