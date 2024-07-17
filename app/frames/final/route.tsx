@@ -2,21 +2,29 @@ import { Button } from "frames.js/next";
 import { frames } from "../frames";
 
 const handleRequest = frames(async (ctx) => {
-    const realImage = `https://glo-dollars-mvp.vercel.app/end.png`
-    return {
-        image: realImage,
-        buttons: [
-            <Button action="link" target="https://warpcast.com/~/compose?text=I+just+donated+using+USDGLO.&embeds[]=https://glo-dollars-mvp.vercel.app/frames">
-                Share
-            </Button>,
-            <Button action="link" target="https://www.glodollar.org/articles/how-glo-dollar-works">
-                Why Glo?
-            </Button>,
-            <Button action="link" target="https://warpcast.com/glodollar">
-                Follow @glodollar
-            </Button>
-        ],
-    };
+	const realImage = `https://glo-dollars-mvp.vercel.app/end.png`
+
+	const shareText = `I just made a donation to the charity of the day in Glo Dollars (USDGLO) through this frame made by @glodollar and @pbkompasz. 
+		Feeling generous? 🌈 ☀️
+		Donate to the charity of the day ↓`;
+
+	return {
+		image: realImage,
+		imageOptions: {
+			aspectRatio: "1:1",
+		},
+		buttons: [
+			<Button action="link" target={`https://warpcast.com/~/compose?text=${shareText}&embeds[]=https://glo-dollars-mvp.vercel.app/frames`}>
+				Share
+			</Button>,
+			<Button action="link" target="https://www.glodollar.org/articles/how-glo-dollar-works">
+				Why Glo?
+			</Button>,
+			<Button action="link" target="https://warpcast.com/glodollar">
+				Follow Glo
+			</Button>
+		],
+	};
 });
 
 export const GET = handleRequest;

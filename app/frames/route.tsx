@@ -9,6 +9,8 @@ let topicOfTheDay = TOPICS[0];
 // Cron job, pick charity of the day
 
 let charityOfTheDay: {
+  ein: any;
+  description: any;
   id: string | number | boolean | readonly string[] | readonly number[] | readonly boolean[] | null | undefined; name: any; contractAddress: string;
 };
 
@@ -43,10 +45,13 @@ const searchCharities = async (searchTerm: string, offset: number) => {
     );
     const resp = await rawResp.json();
     const filteredCharities = resp.filter((charity: { deployments: any[]; }) => {
-      const validDeployments = charity.deployments.filter((deployment: { isDeployed: any; }) => deployment.isDeployed);
-      return validDeployments.length === 3;
+      // const validDeployments = charity.deployments.filter((deployment: { isDeployed: any; }) => deployment.isDeployed);
+      // console.log(charity.deployments)
+      // return validDeployments.length === 3;
+      return charity.deployments.length === 3;
     })
     return filteredCharities[0];
+    // return resp[0];
   } catch (error) {
     console.error("Fetch error:", error);
   }
@@ -63,7 +68,7 @@ const getRandomCharity = async () => {
     const randomOffset = Math.floor(Math.random() * 200);
     return await searchCharities(randomChar, randomOffset);
   } catch (error) {
-
+    console.error("Fetch error:", error);
   }
 };
 
@@ -99,9 +104,19 @@ const handleRequest = frames(async (ctx) => {
       if (!charityOfTheDay)
         do {
           charityOfTheDay = await getCharityOfTheDay();
+          console.log('fetching', charityOfTheDay)
         } while (!charityOfTheDay);
-      image = charityOfTheDay.name;
-      newState.address = charityOfTheDay.contractAddress;
+
+      const subDescription = charityOfTheDay.description.substring(0, 300);
+      const i = subDescription.lastIndexOf('. ')
+      const desc = subDescription.substring(0, i !== -1 ? i : 300);
+      image =
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "90%", textAlign: "center" }}>
+          <div style={{ fontSize: 70 }}>Charity of the day</div>
+          <div style={{ fontSize: 48 }}>{charityOfTheDay.name}</div>
+          <div style={{ display: "flex" }}>{String(desc)}{i !== -1 && charityOfTheDay.description.length > 0 ? "..." : ""}</div>
+        </div>
+
       buttons = [
         <Button action="post" target={{ query: { value: 'select-chain', id: charityOfTheDay.id } }}>
           Donate
@@ -109,7 +124,7 @@ const handleRequest = frames(async (ctx) => {
         <Button action="post" target={{ query: { value: 'charity-rand' } }}>
           Show next
         </Button>,
-        <Button action="link" target="https://app.endaoment.org/">
+        <Button action="link" target={`https://app.endaoment.org/orgs/${charityOfTheDay.ein}`}>
           Learn more
         </Button>,
       ]
@@ -123,19 +138,28 @@ const handleRequest = frames(async (ctx) => {
         do {
           randomCharity = await getRandomCharity();
         } while (!randomCharity);
-        newState.address = randomCharity.contractAddress;
         newState.randomCharities[ctx.state.randCount] = randomCharity.id;
       }
-      image = (await getCharity(newState.randomCharities[ctx.state.randCount % 3])).name;
-      console.log(image)
+
+      const charityToShow = await getCharity(newState.randomCharities[ctx.state.randCount % 3])
+      const subDesc = charityToShow.description.substring(0, 300);
+      const index = subDesc.lastIndexOf('. ')
+      const description = subDesc.substring(0, index !== -1 ? index : 300);
+
+      image =
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "90%", textAlign: "center" }}>
+          <div style={{ fontSize: 48 }}>{charityToShow.name}</div>
+          <div style={{ display: "flex" }}>{String(description)}{index !== -1 && charityToShow.description.length > 0 ? "..." : ""}</div>
+        </div>
+
       buttons = [
         <Button action="post" target={{ query: { value: "select-chain", id: newState.randomCharities[ctx.state.randCount % 3] } }}>
           Donate
         </Button>,
-        <Button action="post" target={{ query: { value: "charity-rand" } }}>
+        <Button action="post" target={{ query: { value: ctx.state.randCount % 3 === 2 ? "charity-otd" : "charity-rand" } }}>
           Show next
         </Button>,
-        <Button action="link" target="https://app.endaoment.org/">
+        <Button action="link" target={`https://app.endaoment.org/orgs/${charityToShow.ein}`}>
           Learn more
         </Button>,
       ];
@@ -144,24 +168,29 @@ const handleRequest = frames(async (ctx) => {
     case "select-chain":
       realImage = `https://glo-dollars-mvp.vercel.app/chain.png`
       const charity = await getCharity(ctx.searchParams.id);
+      console.log(charity)
       buttons = [
+        <Button action="post" target={{ query: { value: 'select-amount', chainId: 8453, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 8453)).address } }}>
+          Base
+        </Button>,
         <Button action="post" target={{ query: { value: 'select-amount', chainId: 1, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 1)).address } }}>
           Ethereum
         </Button>,
         <Button action="post" target={{ query: { value: 'select-amount', chainId: 10, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 10)).address } }}>
           Optimism
         </Button>,
-        <Button action="post" target={{ query: { value: 'select-amount', chainId: 8453, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 8453)).address } }}>
-          Base
-        </Button>,
-        <Button action="post" target={{ query: { value: "charity-rand" } }}>
-          Select a random charity instead
+        <Button action="link" target="https://app.uniswap.org/swap?outputCurrency=0x4F604735c1cF31399C6E711D5962b2B3E0225AD3">
+          Get USDGLO
         </Button>,
       ];
       break;
 
     case "select-amount":
-      image = "Select the amount of USDGLO you want to donate";
+      image =
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "90%", textAlign: "center" }}>
+          <div style={{ fontSize: 48 }}>Select the amount of USDGLO you want to donate</div>
+          <div>1 USDGLO equals the value of 1 US dollar.</div>
+        </div>
       const { chainId, address, } = ctx.searchParams
       buttons = [
         <Button action="tx" target={{ pathname: "txdata", query: { chainId, address, amount: 1 } }} post_url="/final">
@@ -181,9 +210,9 @@ const handleRequest = frames(async (ctx) => {
       realImage = `https://glo-dollars-mvp.vercel.app/start.png`
       buttons = [
         <Button action="post" target={{ query: { value: "charity-otd" } }}>
-          Donate
+          Show me!
         </Button>,
-        <Button action="link" target="https://docs.google.com/document/d/1HE6Jvgrw43o37PM2SAEQiGGF7uFOr84Qrz5bvLaEO9Y">
+        <Button action="link" target="https://docs.google.com/document/d/1T05i0W1-VPEvs72480eO2-RGyx4GAPI_2DheaoLCy7Y">
           How it works
         </Button>,
       ];
@@ -194,6 +223,9 @@ const handleRequest = frames(async (ctx) => {
     image: realImage ?? <span style={{
       backgroundColor: "#EAF4F3", width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center"
     }}>{image}</span>,
+    imageOptions: {
+      aspectRatio: "1:1",
+    },
     buttons,
     state: newState,
   };
