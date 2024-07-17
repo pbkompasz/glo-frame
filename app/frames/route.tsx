@@ -112,10 +112,12 @@ const handleRequest = frames(async (ctx) => {
       const desc = subDescription.substring(0, i !== -1 ? i : 300);
       image =
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "90%", textAlign: "center" }}>
-          <div style={{ fontSize: 70 }}>Charity of the day</div>
+          <div style={{ fontSize: 70, marginBottom: 48 }}>Charity of the day  🌈☀️</div>
           <div style={{ fontSize: 48 }}>{charityOfTheDay.name}</div>
           <div style={{ display: "flex" }}>{String(desc)}{i !== -1 && charityOfTheDay.description.length > 0 ? "..." : ""}</div>
         </div>
+      
+      console.log(charityOfTheDay)
 
       buttons = [
         <Button action="post" target={{ query: { value: 'select-chain', id: charityOfTheDay.id } }}>
@@ -124,7 +126,7 @@ const handleRequest = frames(async (ctx) => {
         <Button action="post" target={{ query: { value: 'charity-rand' } }}>
           Show next
         </Button>,
-        <Button action="link" target={`https://app.endaoment.org/orgs/${charityOfTheDay.ein}`}>
+        <Button action="link" target={`https://app.endaoment.org/orgs/${charityOfTheDay.id}`}>
           Learn more
         </Button>,
       ]
@@ -148,6 +150,7 @@ const handleRequest = frames(async (ctx) => {
 
       image =
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "90%", textAlign: "center" }}>
+          <div style={{ fontSize: 70, marginBottom: 48, display: "flex" }}>Random charity #{newState.randCount}</div>
           <div style={{ fontSize: 48 }}>{charityToShow.name}</div>
           <div style={{ display: "flex" }}>{String(description)}{index !== -1 && charityToShow.description.length > 0 ? "..." : ""}</div>
         </div>
@@ -159,7 +162,7 @@ const handleRequest = frames(async (ctx) => {
         <Button action="post" target={{ query: { value: ctx.state.randCount % 3 === 2 ? "charity-otd" : "charity-rand" } }}>
           Show next
         </Button>,
-        <Button action="link" target={`https://app.endaoment.org/orgs/${charityToShow.ein}`}>
+        <Button action="link" target={`https://app.endaoment.org/orgs/${charityToShow.id}`}>
           Learn more
         </Button>,
       ];
