@@ -106,6 +106,7 @@ const handleRequest = frames(async (ctx) => {
           charityOfTheDay = await getCharityOfTheDay();
           console.log('fetching', charityOfTheDay)
         } while (!charityOfTheDay);
+      newState.randCount = 0;
 
       const subDescription = charityOfTheDay.description.substring(0, 300);
       const i = subDescription.lastIndexOf('. ')
@@ -136,7 +137,7 @@ const handleRequest = frames(async (ctx) => {
     case "charity-rand":
       let randomCharity;
       newState.randCount = ctx.state.randCount + 1;
-      if (ctx.state.randCount < 3) {
+      if (!ctx.state.randomCharities[ctx.state.randCount]) {
         do {
           randomCharity = await getRandomCharity();
         } while (!randomCharity);
@@ -150,7 +151,7 @@ const handleRequest = frames(async (ctx) => {
 
       image =
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "90%", textAlign: "center" }}>
-          <div style={{ fontSize: 70, marginBottom: 48, display: "flex" }}>Random charity #{newState.randCount}</div>
+          <div style={{ fontSize: 70, marginBottom: 48, display: "flex" }}>Random charity #{ctx.state.randCount%3+1}</div>
           <div style={{ fontSize: 48 }}>{charityToShow.name}</div>
           <div style={{ display: "flex" }}>{String(description)}{index !== -1 && charityToShow.description.length > 0 ? "..." : ""}</div>
         </div>
@@ -182,7 +183,7 @@ const handleRequest = frames(async (ctx) => {
         <Button action="post" target={{ query: { value: 'select-amount', chainId: 10, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 10)).address } }}>
           Optimism
         </Button>,
-        <Button action="link" target="https://app.uniswap.org/swap?outputCurrency=0x4F604735c1cF31399C6E711D5962b2B3E0225AD3">
+        <Button action="link" target="https://docs.google.com/document/d/1T05i0W1-VPEvs72480eO2-RGyx4GAPI_2DheaoLCy7Y">
           Get USDGLO
         </Button>,
       ];
