@@ -219,6 +219,7 @@ export const POST = frames(async (ctx) => {
       to: GLO_TOKEN_ADDRESS,
       data,
       value,
+      // FIX ME
       gas: String(100000000000),
     },
   });
