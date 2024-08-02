@@ -174,13 +174,13 @@ const handleRequest = frames(async (ctx) => {
       const charity = await getCharity(ctx.searchParams.id);
       console.log(charity)
       buttons = [
-        <Button action="post" target={{ query: { value: 'select-amount', chainId: 8453, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 8453)).address } }}>
+        <Button action="post" target={{ query: { value: 'select-amount', chainId: 8453, id: charity.id } }}>
           Base
         </Button>,
-        <Button action="post" target={{ query: { value: 'select-amount', chainId: 1, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 1)).address } }}>
+        <Button action="post" target={{ query: { value: 'select-amount', chainId: 1, id: charity.id } }}>
           Ethereum
         </Button>,
-        <Button action="post" target={{ query: { value: 'select-amount', chainId: 10, address: (charity.deployments.find((d: { chainId: number; }) => d.chainId === 10)).address } }}>
+        <Button action="post" target={{ query: { value: 'select-amount', chainId: 10, id: charity.id } }}>
           Optimism
         </Button>,
         <Button action="link" target="https://docs.google.com/document/d/1T05i0W1-VPEvs72480eO2-RGyx4GAPI_2DheaoLCy7Y">
@@ -195,15 +195,15 @@ const handleRequest = frames(async (ctx) => {
           <div style={{ fontSize: 48 }}>Select the amount of USDGLO you want to donate</div>
           <div>1 USDGLO equals the value of 1 US dollar.</div>
         </div>
-      const { chainId, address, } = ctx.searchParams
+      const { chainId, id, } = ctx.searchParams
       buttons = [
-        <Button action="tx" target={{ pathname: "txdata", query: { chainId, address, amount: 1 } }} post_url="/final">
+        <Button action="tx" target={{ pathname: "txdata", query: { chainId, id, amount: 1 } }} post_url="/final">
           1 USDGLO
         </Button>,
-        <Button action="tx" target={{ pathname: "txdata", query: { chainId, address, amount: 10 } }} post_url="/final">
+        <Button action="tx" target={{ pathname: "txdata", query: { chainId, id, amount: 10 } }} post_url="/final">
           10 USDGLO
         </Button>,
-        <Button action="tx" target={{ pathname: "txdata", query: { chainId, address, amount: 100 } }} post_url="/final">
+        <Button action="tx" target={{ pathname: "txdata", query: { chainId, id, amount: 100 } }} post_url="/final">
           100 USDGLO
         </Button>,
       ];
